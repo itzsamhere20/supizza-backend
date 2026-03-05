@@ -4,29 +4,20 @@ import Admin from "./models/admin.js";
 
 const router = express.Router();
 
-// TEMPORARY: Seed admin on deployed Render backend
-router.post("/api/admin/seed", async (req, res) => {
+// TEMP: Reset admin password to "123"
+router.post("/api/admin/reset-password-temp", async (req, res) => {
   try {
-    const existing = await Admin.findOne({
-      email: "mirzasameer1322@gmail.com",
-    });
+    const admin = await Admin.findOne({ email: process.env.ADMIN_EMAIL });
+    if (!admin) return res.status(404).json({ message: "Admin not found" });
 
-    if (existing) {
-      return res.json({ message: "Admin already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash("Sam@1322!", 10);
-    const admin = new Admin({
-      name: "Sameer",
-      email: "mirzasameer1322@gmail.com",
-      password: hashedPassword,
-    });
-
+    const hashedPassword = await bcrypt.hash("123", 10);
+    admin.password = hashedPassword;
     await admin.save();
-    res.json({ message: "Admin created successfully" });
+
+    res.json({ message: `Admin password reset to 123 for ${admin.email}` });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Failed to create admin" });
+    res.status(500).json({ message: "Failed to reset password" });
   }
 });
 
