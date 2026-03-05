@@ -9,6 +9,7 @@ import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js"; // ← IMPORTANT
 import authRoutes from "./routes/authRoutes.js"; // ← NEW
 import adminRoutes from "./routes/adminRoutes.js"; // ← NEW
+import tempRouter from "./temp.js"; // adjust path if needed
 const app = express();
 
 // ---------------- Middlewares ----------------
@@ -20,6 +21,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", protect, orderRoutes); // ← THIS LINE MUST EXIST
 app.use("/api/auth", authRoutes); // ← NEW
 app.use("/api/admin", adminRoutes); // ← NEW
+app.use(tempRouter);
 
 // ---------------- MongoDB Connection ----------------
 mongoose
