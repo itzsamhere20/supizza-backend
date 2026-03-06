@@ -49,24 +49,31 @@ router.post("/forgot-password", async (req, res) => {
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
-    secure: false, // TLS
+    secure: false,
     auth: {
       user: process.env.ADMIN_EMAIL,
       pass: process.env.ADMIN_EMAIL_PASS,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
     tls: {
       rejectUnauthorized: false,
     },
   });
+  try {
+    await transporter.sendMail({
+      from: process.env.ADMIN_EMAIL,
+      to: email,
+      subject: "Password Reset OTP",
+      text: `Your OTP is: ${otp} (valid 5 minutes)`,
+    });
 
-  await transporter.sendMail({
-    from: process.env.ADMIN_EMAIL,
-    to: email,
-    subject: "Password Reset OTP",
-    text: `Your OTP is: ${otp} (valid 5 minutes)`,
-  });
-
-  res.status(200).json({ message: "OTP sent to email" });
+    res.status(200).json({ message: "OTP sent to email" });
+  } catch (err) {
+    console.error("Email error:", err);
+    res.status(500).json({ message: "Email send failed" });
+  }
 });
 
 // ---------------- VERIFY OTP ----------------
