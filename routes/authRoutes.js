@@ -1,21 +1,14 @@
-import nodemailer from "nodemailer";
-
 import express from "express";
 import User from "../models/user.js";
 import jwt from "jsonwebtoken";
+import { Resend } from "resend";
 
 const router = express.Router();
-// ---------------- Configure Nodemailer ----------------
-const transporter = nodemailer.createTransport({
-  service: "gmail", // or another email service
-  auth: {
-    user: process.env.EMAIL_USER, // your email
-    pass: process.env.EMAIL_PASS, // app password for Gmail or SMTP password
-  },
-});
 
 // ---------------- In-memory OTP store ----------------
 let otpStore = {};
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Send OTP route
 router.post("/send-otp", async (req, res) => {
@@ -54,8 +47,8 @@ router.post("/send-otp", async (req, res) => {
   `;
 
   try {
-    await transporter.sendMail({
-      from: `"Supizza" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: "Supizza <onboarding@resend.dev>",
       to: email,
       subject: "Your OTP Code for Supizza Login",
       html: htmlContent,
@@ -362,15 +355,17 @@ router.post("/contact", async (req, res) => {
     `;
 
     // ---------------- Send Emails ----------------
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+    // Send email to owner
+    await resend.emails.send({
+      from: "Supizza <onboarding@resend.dev>", // use this for testing
       to: process.env.OWNER_EMAIL,
       subject: `📩 New Contact Message from ${name}`,
       html: ownerEmailHtml,
     });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+    // Send confirmation email to customer
+    await resend.emails.send({
+      from: "Supizza <onboarding@resend.dev>",
       to: email,
       subject: "We received your message",
       html: customerEmailHtml,
