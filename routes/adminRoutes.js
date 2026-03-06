@@ -47,10 +47,15 @@ router.post("/forgot-password", async (req, res) => {
 
   // Send OTP via email
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // TLS
     auth: {
       user: process.env.ADMIN_EMAIL,
       pass: process.env.ADMIN_EMAIL_PASS,
+    },
+    tls: {
+      rejectUnauthorized: false,
     },
   });
 
@@ -152,110 +157,4 @@ router.get("/me", protectAdmin, async (req, res) => {
     admin: { name: req.admin.name, email: req.admin.email },
   });
 });
-
-// // ----------add admins----------------------------
-// // POST /api/admin/add
-// router.post("/add", protectAdmin, async (req, res) => {
-//   try {
-//     // Only super admin can add
-//     if (!req.admin.superAdmin)
-//       return res
-//         .status(403)
-//         .json({ message: "Access denied. Only super admin can add admins." });
-
-//     const { name, email, password, superAdmin = false } = req.body;
-
-//     if (!name || !email || !password)
-//       return res
-//         .status(400)
-//         .json({ message: "Name, email, and password required" });
-
-//     const existing = await Admin.findOne({ email });
-//     if (existing)
-//       return res
-//         .status(400)
-//         .json({ message: "Admin with this email already exists" });
-
-//     const hashed = await bcrypt.hash(password, 10);
-//     const newAdmin = await Admin.create({
-//       name,
-//       email,
-//       password: hashed,
-//       superAdmin,
-//     });
-
-//     res.status(201).json({
-//       message: "Admin added successfully",
-//       admin: {
-//         name: newAdmin.name,
-//         email: newAdmin.email,
-//         superAdmin: newAdmin.superAdmin,
-//       },
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
-// // GET /api/admin/all
-// router.get("/all", protectAdmin, async (req, res) => {
-//   try {
-//     if (!req.admin.superAdmin)
-//       return res.status(403).json({ message: "Access denied" });
-
-//     const admins = await Admin.find(
-//       {},
-//       "name email superAdmin createdAt updatedAt",
-//     ); // only needed fields
-//     res.status(200).json(admins);
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
-// // edit other admin--------------
-// // PUT /api/admin/:id
-// router.put("/:id", protectAdmin, async (req, res) => {
-//   try {
-//     if (!req.admin.superAdmin)
-//       return res.status(403).json({ message: "Access denied" });
-
-//     const { name, email, password, superAdmin } = req.body;
-//     const adminToUpdate = await Admin.findById(req.params.id);
-//     if (!adminToUpdate)
-//       return res.status(404).json({ message: "Admin not found" });
-
-//     if (name) adminToUpdate.name = name;
-//     if (email) adminToUpdate.email = email;
-//     if (typeof superAdmin === "boolean") adminToUpdate.superAdmin = superAdmin;
-//     if (password) adminToUpdate.password = await bcrypt.hash(password, 10);
-
-//     await adminToUpdate.save();
-//     res.status(200).json({ message: "Admin updated successfully" });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
-
-// // -----delete admin-------
-// // DELETE /api/admin/:id
-// router.delete("/:id", protectAdmin, async (req, res) => {
-//   try {
-//     if (!req.admin.superAdmin)
-//       return res.status(403).json({ message: "Access denied" });
-
-//     const adminToDelete = await Admin.findById(req.params.id);
-//     if (!adminToDelete)
-//       return res.status(404).json({ message: "Admin not found" });
-
-//     await adminToDelete.deleteOne();
-//     res.status(200).json({ message: "Admin deleted successfully" });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// });
 export default router;
