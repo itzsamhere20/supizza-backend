@@ -228,13 +228,13 @@ router.post("/place-order", async (req, res) => {
     await resend.emails.send({
       from: "Supizza <onboarding@resend.dev>",
       to: [customer.email],
-      subject: `Your Order is Confirmed!`,
+      subject: "Your Order is Confirmed!",
       html: customerEmailHtml,
     });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: process.env.OWNER_EMAIL,
+    await resend.emails.send({
+      from: "Supizza <onboarding@resend.dev>",
+      to: [process.env.OWNER_EMAIL],
       subject: `📦 New Order Received: ${orderId}`,
       html: ownerEmailHtml,
     });
