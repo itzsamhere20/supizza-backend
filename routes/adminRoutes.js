@@ -2,14 +2,9 @@ import express from "express";
 import Admin from "../models/admin.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import Mailgun from "mailgun.js";
-import formData from "form-data";
+import { Resend } from "resend";
 
-const mailgun = new Mailgun(formData);
-const mg = mailgun.client({
-  username: "api",
-  key: process.env.MAILGUN_API_KEY,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const router = express.Router();
 
@@ -56,9 +51,9 @@ router.post("/forgot-password", async (req, res) => {
 
   // ---------------- Nodemailer Transport ----------------
   try {
-    await mg.messages.create(process.env.MAILGUN_DOMAIN, {
-      from: `Supizza <postmaster@${process.env.MAILGUN_DOMAIN}>`,
-      to: [email],
+    await resend.emails.send({
+      from: "Supizza <noreply@supizza.com>",
+      to: email,
       subject: "Password Reset OTP",
       text: `Your OTP is: ${otp} (valid for 5 minutes)`,
     });
