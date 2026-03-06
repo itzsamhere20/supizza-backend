@@ -52,7 +52,7 @@ router.post("/forgot-password", async (req, res) => {
   // ---------------- Nodemailer Transport ----------------
   try {
     await resend.emails.send({
-      from: "Supizza <noreply@supizza.com>",
+      from: "Acme <onboarding@resend.dev>",
       to: process.env.ADMIN_EMAIL,
       subject: "Password Reset OTP",
       text: `Your OTP is: ${otp} (valid for 5 minutes)`,
