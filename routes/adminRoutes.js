@@ -2,7 +2,14 @@ import express from "express";
 import Admin from "../models/admin.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
+import Mailgun from "mailgun.js";
+import formData from "form-data";
+
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({
+  username: "api",
+  key: process.env.MAILGUN_API_KEY,
+});
 
 const router = express.Router();
 
@@ -48,31 +55,17 @@ router.post("/forgot-password", async (req, res) => {
   // Send OTP via email
 
   // ---------------- Nodemailer Transport ----------------
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587, // TLS port
-    secure: false, // STARTTLS
-    auth: {
-      user: process.env.ADMIN_EMAIL,
-      pass: process.env.ADMIN_EMAIL_PASS,
-    },
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-    tls: { rejectUnauthorized: false },
-  });
-
   try {
-    await transporter.sendMail({
-      from: `"SuPizza Admin" <${process.env.ADMIN_EMAIL}>`,
-      to: email,
-      subject: "SuPizza Password Reset OTP",
-      text: `Your OTP is: ${otp}\nValid for 5 minutes`,
+    await mg.messages.create(process.env.MAILGUN_DOMAIN, {
+      from: `Supizza <mail@${process.env.MAILGUN_DOMAIN}>`,
+      to: [email],
+      subject: "Password Reset OTP",
+      text: `Your OTP is: ${otp} (valid for 5 minutes)`,
     });
 
     res.status(200).json({ message: "OTP sent to email" });
   } catch (err) {
-    console.error("Email send failed:", err);
+    console.error(err);
     res.status(500).json({ message: "Email send failed" });
   }
 });
