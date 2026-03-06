@@ -57,7 +57,7 @@ router.post("/forgot-password", async (req, res) => {
   // ---------------- Nodemailer Transport ----------------
   try {
     await mg.messages.create(process.env.MAILGUN_DOMAIN, {
-      from: `Supizza <mail@${process.env.MAILGUN_DOMAIN}>`,
+      from: `Supizza <postmaster@${process.env.MAILGUN_DOMAIN}>`,
       to: [email],
       subject: "Password Reset OTP",
       text: `Your OTP is: ${otp} (valid for 5 minutes)`,
