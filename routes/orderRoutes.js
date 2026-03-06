@@ -4,8 +4,10 @@
 
 import express from "express";
 import Order from "../models/order.js";
-import transporter from "../config/email.js"; // nodemailer transporter
 import Product from "../models/product.js";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 const router = express.Router();
 
 // ---------------- Helper: Generate Random Order ID ----------------
@@ -223,10 +225,10 @@ router.post("/place-order", async (req, res) => {
     `;
 
     // ---------------- Send Emails ----------------
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: customer.email,
-      subject: ` Your Order is Confirmed!`,
+    await resend.emails.send({
+      from: "Supizza <onboarding@resend.dev>",
+      to: [customer.email],
+      subject: `Your Order is Confirmed!`,
       html: customerEmailHtml,
     });
 
@@ -392,9 +394,9 @@ router.put("/status/:id", async (req, res) => {
   </div>
 `;
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: order.customer.email,
+      await resend.emails.send({
+        from: "Supizza <onboarding@resend.dev>",
+        to: [order.customer.email],
         subject: `Your Order #${order.orderId} Has Been Cancelled`,
         html: cancelEmailHtml,
       });
@@ -493,9 +495,9 @@ router.put("/status/:id", async (req, res) => {
   </div>
 `;
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: order.customer.email,
+      await resend.emails.send({
+        from: "Supizza <onboarding@resend.dev>",
+        to: [order.customer.email],
         subject: `🚚 Order #${order.orderId} is Out for Delivery`,
         html: outForDeliveryEmailHtml,
       });
@@ -535,9 +537,9 @@ router.put("/status/:id", async (req, res) => {
   </div>
 `;
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: order.customer.email,
+      await resend.emails.send({
+        from: "Supizza <onboarding@resend.dev>",
+        to: [order.customer.email],
         subject: `✅ Order #${order.orderId} Delivered`,
         html: deliveredEmailHtml,
       });
