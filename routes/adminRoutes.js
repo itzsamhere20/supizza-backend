@@ -9,6 +9,31 @@ const router = express.Router();
 // ---------------- In-memory OTP store ----------------
 let otpStore = {};
 
+// ---------------- LOGIN ----------------
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password)
+    return res.status(400).json({ message: "Email & password required" });
+
+  const admin = await Admin.findOne({ email });
+  if (!admin) return res.status(400).json({ message: "Admin not found" });
+
+  const match = await bcrypt.compare(password, admin.password);
+  if (!match) return res.status(400).json({ message: "Incorrect password" });
+
+  const token = jwt.sign(
+    { id: admin._id, email: admin.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" },
+  );
+
+  res.status(200).json({
+    message: "Login successful",
+    token,
+    admin: { name: admin.name, email: admin.email },
+  });
+});
+
 // ---------------- FORGOT PASSWORD (Send OTP) ----------------
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
@@ -17,9 +42,10 @@ router.post("/forgot-password", async (req, res) => {
   const admin = await Admin.findOne({ email });
   if (!admin) return res.status(400).json({ message: "Admin not found" });
 
-  // Generate 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  otpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 }; // 5 min expiry
+  otpStore[email] = { otp, expires: Date.now() + 5 * 60 * 1000 }; // 5 min
+
+  // Send OTP via email
 
   // ---------------- Nodemailer Transport ----------------
   const transporter = nodemailer.createTransport({
@@ -50,7 +76,6 @@ router.post("/forgot-password", async (req, res) => {
     res.status(500).json({ message: "Email send failed" });
   }
 });
-
 // ---------------- VERIFY OTP ----------------
 router.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
@@ -85,6 +110,23 @@ router.post("/reset-password", async (req, res) => {
 
   res.status(200).json({ message: "Password updated successfully" });
 });
+
+// ---------------- JWT Middleware ----------------
+const protectAdmin = async (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const admin = await Admin.findById(decoded.id);
+    if (!admin) return res.status(404).json({ message: "Admin not found" });
+    req.admin = admin;
+    next();
+  } catch {
+    return res.status(403).json({ message: "Invalid token" });
+  }
+};
 
 // ---------------- UPDATE PROFILE ----------------
 router.put("/update-profile", protectAdmin, async (req, res) => {
