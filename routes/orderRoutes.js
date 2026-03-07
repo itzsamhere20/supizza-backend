@@ -226,14 +226,14 @@ router.post("/place-order", async (req, res) => {
 
     // ---------------- Send Emails ----------------
     await resend.emails.send({
-      from: "Supizza <onboarding@resend.dev>",
+      from: "support@supizza.online",
       to: [customer.email],
       subject: "Your Order is Confirmed!",
       html: customerEmailHtml,
     });
 
     await resend.emails.send({
-      from: "Supizza <onboarding@resend.dev>",
+      from: "support@supizza.online",
       to: [process.env.OWNER_EMAIL],
       subject: `📦 New Order Received: ${orderId}`,
       html: ownerEmailHtml,
@@ -395,7 +395,7 @@ router.put("/status/:id", async (req, res) => {
 `;
 
       await resend.emails.send({
-        from: "Supizza <onboarding@resend.dev>",
+        from: "support@supizza.online",
         to: [order.customer.email],
         subject: `Your Order #${order.orderId} Has Been Cancelled`,
         html: cancelEmailHtml,
@@ -496,7 +496,7 @@ router.put("/status/:id", async (req, res) => {
 `;
 
       await resend.emails.send({
-        from: "Supizza <onboarding@resend.dev>",
+        from: "support@supizza.online",
         to: [order.customer.email],
         subject: `🚚 Order #${order.orderId} is Out for Delivery`,
         html: outForDeliveryEmailHtml,
@@ -538,7 +538,7 @@ router.put("/status/:id", async (req, res) => {
 `;
 
       await resend.emails.send({
-        from: "Supizza <onboarding@resend.dev>",
+        from: "support@supizza.online",
         to: [order.customer.email],
         subject: `✅ Order #${order.orderId} Delivered`,
         html: deliveredEmailHtml,

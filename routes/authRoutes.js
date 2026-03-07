@@ -48,7 +48,7 @@ router.post("/send-otp", async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: "Supizza <onboarding@resend.dev>",
+      from: "support@supizza.online",
       to: [email],
       subject: "Your OTP Code for Supizza Login",
       html: htmlContent,
@@ -357,7 +357,7 @@ router.post("/contact", async (req, res) => {
     // ---------------- Send Emails ----------------
     // Send email to owner
     await resend.emails.send({
-      from: "Supizza <onboarding@resend.dev>", // use this for testing
+      from: "support@supizza.online", // use this for testing
       to: process.env.OWNER_EMAIL,
       subject: `📩 New Contact Message from ${name}`,
       html: ownerEmailHtml,
@@ -365,7 +365,7 @@ router.post("/contact", async (req, res) => {
 
     // Send confirmation email to customer
     await resend.emails.send({
-      from: "Supizza <onboarding@resend.dev>",
+      from: "support@supizza.online",
       to: [email],
       subject: "We received your message",
       html: customerEmailHtml,
